@@ -67,6 +67,7 @@ tasks.withType(JavaExec) {
     if (it.name == 'junitPlatformTest') {
         doFirst {
             jvmArgs "-javaagent:${configurations.testAgent.singleFile}=destfile=${project.buildDir.name}/jacoco/test.exec"
+            jvmArgs "--add-modules=jdk.incubator.httpclient"
         }
     }
 }
