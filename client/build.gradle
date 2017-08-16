@@ -1,0 +1,72 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+apply plugin: 'org.junit.platform.gradle.plugin'
+apply plugin: 'jacoco'
+
+ext.moduleName = 'org.fcrepo.client'
+group = 'org.fcrepo.client'
+
+description = """Fedora 4 Java Client"""
+
+sourceCompatibility = 1.9
+targetCompatibility = 1.9
+
+repositories {
+    maven { url "http://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url 'https://jitpack.io' }
+}
+
+jacoco {
+    toolVersion = "0.7.9"
+}
+
+configurations {
+    testAgent {
+        transitive = false
+    }
+}
+
+dependencies {
+    implementation 'org.apache.httpcomponents:httpclient:4.4.1'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.3.2'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.10'
+    testCompile group: 'name.falgout.jeffrey.testing.junit5', name: 'mockito-extension', version: '1.0.0-RC2'
+    testCompile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.8.47'
+    testCompile group: 'commons-io', name: 'commons-io', version: '2.5'
+    testCompile group: 'org.glassfish.grizzly', name: 'grizzly-http-servlet', version: '2.3.28'
+    testCompile group: 'org.glassfish.jersey.core', name: 'jersey-common', version: '2.24'
+    testCompile group: 'org.glassfish.jersey.ext', name: 'jersey-spring3', version: '2.24'
+    testCompile group: 'org.glassfish.jersey.test-framework.providers', name: 'jersey-test-framework-provider-grizzly2', version: '2.24'
+    testCompile(group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8') {
+        exclude group: 'org.apache.commons', module: 'commons-io'
+    }
+    testCompile(group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.8') {
+        exclude group: 'org.apache.commons', module: 'commons-io'
+    }
+    testCompile group: 'org.fcrepo', name: 'fcrepo-kernel-modeshape', version: '4.7.4', classifier: 'tests'
+    testCompile group: 'org.fcrepo', name: 'fcrepo-http-api', version: '4.7.4'
+    testCompile group: 'org.fcrepo', name: 'fcrepo-configs', version: '4.7.4'
+    testCompile group: 'org.fcrepo', name: 'fcrepo-http-commons', version: '4.7.4'
+    testCompile group: 'org.fcrepo', name: 'fcrepo-auth-common', version: '4.7.4'
+    testCompile group: 'joda-time', name: 'joda-time', version: '2.9.2'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile('com.github.sbrannen:spring-test-junit5:1.0.0.M6')
+    testRuntime("org.junit.vintage:junit-vintage-engine:4.12.0-M5")
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.0.0-M5")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0-M5")
+    testCompile("org.junit.platform:junit-platform-runner:1.0.0-M5")
+    testAgent("org.jacoco:org.jacoco.agent:0.7.9:runtime")
+}
+
+tasks.withType(JavaExec) {
+    if (it.name == 'junitPlatformTest') {
+        doFirst {
+            jvmArgs "-javaagent:${configurations.testAgent.singleFile}=destfile=${project.buildDir.name}/jacoco/test.exec"
+        }
+    }
+}
